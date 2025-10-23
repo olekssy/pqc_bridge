@@ -1,5 +1,9 @@
 # PQBridge
 
+[![Rust](https://img.shields.io/badge/Rust-Edition%202021-orange)](https://www.rust-lang.org/)
+![License](https://img.shields.io/github/license/olekssy/pq_bridge)
+![Last commit](https://img.shields.io/github/last-commit/olekssy/pq_bridge)
+
 **Post-Quantum Secure Communication Bridge**
 
 PQBridge establishes quantum-resistant encrypted communication channels between parties using NIST post-quantum cryptography standards. Traditional public-key systems (RSA, ECC) are vulnerable to quantum computer algorithms, such as Shor's and Grover's. PQBridge protects against this threat using lattice-based cryptography and true quantum randomness for key generation, significantly improving resistance to both classical and quantum attacks.
