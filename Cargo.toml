@@ -1,5 +1,5 @@
 [package]
-name = "pq_bridge"
+name = "pqc_bridge"
 version = "0.1.0"
 edition = "2024"
 
