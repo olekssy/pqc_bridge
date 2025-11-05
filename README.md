@@ -10,20 +10,29 @@
 A lightweight Rust library for post-quantum cryptography providing secure key management, encryption, and digital signatures using NIST-standardized algorithms.
 
 **Key Features:**
-- Simple, clean API for quantum-resistant cryptography
-- Hybrid encryption combining post-quantum key encapsulation with symmetric encryption
-- Digital signatures with post-quantum algorithms
-- Based on NIST FIPS 203 (ML-KEM/Kyber) and FIPS 204 (ML-DSA/Dilithium)
+- 🔐 Simple, clean API for quantum-resistant cryptography
+- ⚡ Hybrid encryption combining post-quantum key encapsulation with symmetric encryption
+- ✍️ Digital signatures with post-quantum algorithms
+- 🎯 Based on NIST FIPS 203 (ML-KEM/Kyber) and FIPS 204 (ML-DSA/Dilithium)
 
-## Quick Start
+## Installation
+
+Add `pqc_bridge` to your `Cargo.toml`:
+
+```toml
+[dependencies]
+pqc_bridge = "0.1.0"
+```
+
+Or use `cargo add`:
 
 ```bash
-git clone https://github.com/olekssy/pqc_bridge.git
-cd pqc_bridge
-cargo run -- demo
+cargo add pqc_bridge
 ```
 
 ## Usage
+
+Just four simple functions for all your post-quantum cryptography needs:
 
 ```rust
 use pqc_bridge::{KeyPair, encrypt, decrypt, sign, verify};
@@ -47,6 +56,16 @@ fn main() {
     // Verify with sender's public key
     assert!(verify(message, &signature, &keypair.to_public_key()));
 }
+```
+
+## Try the Demo
+
+Clone and run the interactive demo:
+
+```bash
+git clone https://github.com/olekssy/pqc_bridge.git
+cd pqc_bridge
+cargo run -- demo
 ```
 
 ## Architecture
