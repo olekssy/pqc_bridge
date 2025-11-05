@@ -79,7 +79,7 @@ impl KeyPair {
     /// Creates new KeyPair from public keys:
     /// * Dilithium for signing/verification
     /// * Kyber for encryption/decryption
-    /// At least one public key must be provided.
+    ///   At least one public key must be provided.
     pub fn new_from_public_keys(
         dilithium_public: Option<Vec<u8>>,
         kyber_public: Option<Vec<u8>>,

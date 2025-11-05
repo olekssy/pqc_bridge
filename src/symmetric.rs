@@ -1,6 +1,5 @@
 use aes_gcm::aead::{Aead, AeadCore};
 use aes_gcm::{Aes256Gcm, KeyInit, Nonce};
-use rand;
 use sha3::{Digest, Sha3_256};
 
 /// Encrypts data using AES-256-GCM with provided key.
