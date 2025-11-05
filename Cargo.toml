@@ -1,7 +1,14 @@
 [package]
 name = "pqc_bridge"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
+authors = ["Olekssy Lialka <dev.lialka@pm.me>"]
+description = "A lightweight Rust library for post-quantum cryptography providing secure key management, encryption, and digital signatures using NIST-standardized algorithms"
+license = "MIT"
+repository = "https://github.com/olekssy/pqc_bridge"
+readme = "README.md"
+keywords = ["cryptography", "post-quantum", "kyber", "dilithium", "encryption"]
+categories = ["cryptography"]
 
 [dependencies]
 aes-gcm = "0.10.3"
