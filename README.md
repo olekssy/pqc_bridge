@@ -1,7 +1,11 @@
 # pqc_bridge
 
-![License](https://img.shields.io/github/license/olekssy/pqc_bridge)
+[![docs.rs (with version)](https://img.shields.io/docsrs/pqc_bridge/latest)](https://docs.rs/pqc_bridge/latest/pqc_bridge/)
+[![Crates.io](https://img.shields.io/crates/v/pqc_bridge)](https://crates.io/crates/pqc_bridge)
 ![Last commit](https://img.shields.io/github/last-commit/olekssy/pqc_bridge)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/olekssy/pqc_bridge/rust.yml)
+![License](https://img.shields.io/github/license/olekssy/pqc_bridge)
+
 
 A lightweight Rust library for post-quantum cryptography providing secure key management, encryption, and digital signatures using NIST-standardized algorithms.
 

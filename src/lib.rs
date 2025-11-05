@@ -28,7 +28,7 @@ mod symmetric;
 pub use keys::KeyPair;
 pub use messages::Message;
 
-use base64::{Engine, prelude::BASE64_STANDARD};
+use base64::{prelude::BASE64_STANDARD, Engine};
 
 /// Encrypts a message with recipient's public key.
 pub fn encrypt(message: &str, pub_key: &KeyPair) -> Message {
