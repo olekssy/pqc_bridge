@@ -1,180 +1,156 @@
-# Bridge
+# pqc_bridge
 
-![License](https://img.shields.io/github/license/olekssy/pq_bridge)
-![Last commit](https://img.shields.io/github/last-commit/olekssy/pq_bridge)
+![License](https://img.shields.io/github/license/olekssy/pqc_bridge)
+![Last commit](https://img.shields.io/github/last-commit/olekssy/pqc_bridge)
 
-## Post-Quantum Computing Secure Communication Bridge
+A lightweight Rust library for post-quantum cryptography providing secure key management, encryption, and digital signatures using NIST-standardized algorithms.
 
-Bridge is a library for quantum-resistant encrypted communication between parties using NIST post-quantum cryptography standards.
-It protects against the potential threats posed by quantum algorithms using lattice-based cryptography and true quantum randomness for key generation.
-The encryption framework is based on reputable cryptographic primitives to ensure both security and performance.
+**Key Features:**
+- Simple, clean API for quantum-resistant cryptography
+- Hybrid encryption combining post-quantum key encapsulation with symmetric encryption
+- Digital signatures with post-quantum algorithms
+- Based on NIST FIPS 203 (ML-KEM/Kyber) and FIPS 204 (ML-DSA/Dilithium)
 
-## Demo Quickstart
+## Quick Start
 
 ```bash
-# Clone and run
-git clone https://github.com/yourusername/pqc_bridge.git
+git clone https://github.com/olekssy/pqc_bridge.git
 cd pqc_bridge
-cargo run --release
+cargo run -- demo
 ```
 
-## Features
-
-- **ML-KEM (Kyber-768)** - NIST FIPS 203 post-quantum key encapsulation (NIST Level 3)
-- **ML-DSA (Dilithium3)** - NIST FIPS 204 post-quantum digital signatures (NIST Level 3)
-- **AES-256-GCM** - Authenticated symmetric encryption with embedded quantum randomness
-- **SHA3-256** - Cryptographic hashing for message integrity
-- **NISQ Quantum RNG** - True quantum randomness for enhanced security (planned)
-- **Hybrid Security** - Combines quantum-resistant key exchange with fast symmetric encryption
-
-## How It Works
-
-### Encryption Flow (Bob → Alice)
-
-```
-📝 Message → 🔗 Hash (SHA3-256) → ✍️ Sign (Dilithium) → 📦 Encapsulate Key (Kyber) → 🔒 Encrypt (AES-256-GCM) → 💾 JSON Payload
-```
-
-1. **🔗 Hash Message** - SHA3-256 creates a fixed-size digest for signing
-2. **✍️ Sign Hash** - Bob's Dilithium private key signs the hash, proving authenticity
-3. **📦 Encapsulate AES Key** - Kyber encapsulates a random AES-256 key using Alice's public key and NISQ randomness (only Alice can decrypt)
-4. **🔒 Encrypt Message** - AES-256-GCM encrypts the actual message with the encapsulated key (fast symmetric encryption)
-5. **💾 Package & Send** - All components (Kyber ciphertext, AES ciphertext, nonce, signature) are packaged in JSON
-
-**Why this approach?**
-- Kyber provides quantum-resistant key exchange but is slower for bulk data
-- AES provides fast encryption but needs secure key distribution
-- Combining them gives both quantum resistance and performance
-- Dilithium provides quantum-resistant signatures, ensuring that the message came from Bob and wasn't tampered with
-
-### Decryption Flow (Alice receives from Bob)
-
-```
-💾 JSON Payload → 📦 Decapsulate Key (Kyber) → 🔓 Decrypt (AES-256-GCM) → ✅ Verify (Dilithium) → 📝 Message
-```
-
-1. **📦 Decapsulate AES Key** - Alice's Kyber private key recovers the AES-256 key
-2. **🔓 Decrypt Message** - AES-256-GCM decrypts the message using the recovered key
-3. **✅ Verify Signature** - Bob's Dilithium public key verifies the signature, confirming authenticity
-
-## Demo
+## Usage
 
 ```rust
-use pq_bridge::{classical::aes, container::EncryptedContainer, pq::{DilithiumKeyPair, KyberKeyPair}};
-use sha3::{Digest, Sha3_256};
-use std::path::Path;
+use pqc_bridge::{KeyPair, encrypt, decrypt, sign, verify};
 
 fn main() {
-    let message = "Hello Alice! This is Bob. 👋 I'm sending you this message through PQBridge—our \
-        quantum-resistant secure channel. Your Kyber public key encrypted this, and my Dilithium signature \
-        proves it's really from me. Even quantum computers can't break this! Welcome to secure communication \
-        in the post-quantum world. 🌉🔐✨"
-        .as_bytes();
-
-    // Alice generates key pairs
-    let kyber_keypair = KyberKeyPair::generate();
-    let dilithium_keypair = DilithiumKeyPair::generate();
-
-    // Bob encrypts & signs for Alice
-    let message_hash = Sha3_256::digest(&message);
-    let signature = dilithium_keypair.sign(&message_hash);
-    let (kyber_ciphertext, aes_key) = KyberKeyPair::encapsulate(&kyber_keypair.public_key);
-    let (aes_ciphertext, nonce) = aes::encrypt(&aes_key, message);
-
-    let payload_for_alice = EncryptedContainer::new(kyber_ciphertext, aes_ciphertext, nonce, signature);
-    payload_for_alice.to_json(Path::new("encrypted_payload_for_alice.json"));
-
-    // Alice decrypts & verifies
-    let payload = EncryptedContainer::from_json(Path::new("encrypted_payload_for_alice.json"));
-    let aes_key = KyberKeyPair::decapsulate(&payload.kyber_ciphertext, kyber_keypair.expose_secret());
-    let decrypted_message = aes::decrypt(&aes_key, &payload.aes_ciphertext, &payload.nonce);
+    let message = "Secret message";
     
-    let message_hash = Sha3_256::digest(&decrypted_message);
-    let is_valid = DilithiumKeyPair::verify(&payload.signature, &message_hash, &dilithium_keypair.public_key);
+    // Generate keypair
+    let keypair = KeyPair::generate();
     
-    println!("Signature Valid: {}", is_valid);
-    println!("Decrypted: {}", String::from_utf8_lossy(&decrypted_message));
+    // Encrypt with recipient's public key
+    let encrypted = encrypt(message, &keypair.to_public_key());
+    
+    // Decrypt with recipient's secret key
+    let decrypted = decrypt(encrypted, &keypair);
+    assert_eq!(message, decrypted);
+    
+    // Sign with sender's secret key
+    let signature = sign(message, &keypair);
+    
+    // Verify with sender's public key
+    assert!(verify(message, &signature, &keypair.to_public_key()));
 }
 ```
 
-### Output
+## Architecture
 
+### Cryptographic Components
+
+- **ML-KEM-768 (Kyber)** - Post-quantum key encapsulation mechanism (NIST FIPS 203)
+- **ML-DSA-65 (Dilithium3)** - Post-quantum digital signature algorithm (NIST FIPS 204)
+- **AES-256-GCM** - Authenticated symmetric encryption
+- **SHA3-256** - Cryptographic hashing for message integrity
+
+### How It Works
+
+**Encryption Flow:**
+1. **Key Encapsulation** - Kyber encapsulates a random AES-256 key using recipient's public key
+2. **Symmetric Encryption** - AES-256-GCM encrypts the message with the encapsulated key
+3. **Packaging** - Returns a `Message` containing Kyber ciphertext, AES ciphertext, and nonce
+
+**Decryption Flow:**
+1. **Key Decapsulation** - Kyber decapsulates the AES-256 key using recipient's secret key
+2. **Symmetric Decryption** - AES-256-GCM decrypts the message
+3. **Verification** - Returns the plaintext message
+
+**Signing & Verification:**
+1. **Signing** - SHA3-256 hashes the message, Dilithium signs the hash
+2. **Verification** - Dilithium verifies the signature against the message hash
+
+**Why Hybrid Encryption?**
+- Kyber provides quantum-resistant key exchange but is computationally expensive
+- AES provides fast bulk encryption but requires secure key distribution
+- Combining them provides both quantum resistance and performance
+
+## API
+
+### KeyPair
+
+A universal container for Dilithium and Kyber keypairs.
+It can be generated anew or constructed from existing public keys shared by the counterparty.
+
+```rust
+// Generate a new keypair
+let keypair = KeyPair::generate(); // contains both secret and public keys
+
+// Extract public key for sharing
+let public_key = keypair.to_public_key(); // no secret keys exposed
+
+// Create keypair from public keys only
+let public_keypair = KeyPair::new_from_public_keys(
+    Some(dilithium_public),
+    Some(kyber_public)
+);
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│  🌉 PQBridge: Quantum-Resistant Secure Communication Demo      │
-└─────────────────────────────────────────────────────────────────┘
 
-📝 Original Message:
-   "Hello Alice! This is Bob. 👋 I'm sending you this message through PQBridge—our 
-    quantum-resistant secure channel. Your Kyber public key encrypted this, and my 
-    Dilithium signature proves it's really from me. Even quantum computers can't 
-    break this! Welcome to secure communication in the post-quantum world. 🌉🔐✨"
-   Length: 321 bytes
+### Encryption & Decryption
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-👩 ALICE: Generate Key Pairs
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```rust
+// Encrypt a message
+let encrypted: Message = encrypt("Hello!", &recipient_public_key);
 
-  🔑 ML-KEM (Kyber) Key Exchange:
-     • Public Key:  1184 bytes
-     • Secret Key:  2400 bytes
+// Decrypt a message
+let plaintext: String = decrypt(encrypted, &recipient_secret_key);
+```
 
-  ✍️  ML-DSA (Dilithium) Signatures:
-     • Public Key:  1952 bytes
-     • Secret Key:  4000 bytes
+### Signing & Verification
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-👨 BOB: Encrypt Message for Alice & Sign
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```rust
+// Sender signs a message
+let signature: String = sign("Important message", &sender_secret_key);
 
-  🔗 Step 1: Hash message with SHA3-256
-     • Hash: 32 bytes
+// Recipient verifies sender's signature
+let is_valid: bool = verify("Important message", &signature, &sender_public_key);
+```
 
-  ✍️  Step 2: Sign hash with ML-DSA (Dilithium)
-     • Signature: 3293 bytes
+## CLI Demo
 
-  📦 Step 3: Encapsulate AES key with ML-KEM (Kyber)
-     • Kyber Ciphertext: 1088 bytes
-     • Encapsulated AES Key: 32 bytes
+Run an interactive demonstration:
 
-  🔒 Step 4: Encrypt message with AES-256-GCM
-     • Ciphertext: 337 bytes
-     • Nonce: 12 bytes
+```bash
+cargo run -- demo
+```
 
-  💾 Payload saved to: 'encrypted_payload.json'
+The demo showcases:
+- Keypair generation
+- Message encryption and decryption
+- Message signing and verification
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-👩 ALICE: Decrypt Message & Verify Signature
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+## Testing
 
-  📦 Step 1: Decapsulate AES key with ML-KEM (Kyber)
-     • Recovered AES Key: 32 bytes
+```bash
+cargo test
+```
 
-  🔓 Step 2: Decrypt with AES-256-GCM
-     • Decrypted: 321 bytes
+## Documentation
 
-  ✅ Step 3: Verify signature with ML-DSA (Dilithium)
-     • Signature Valid: ✓ YES
+Generate and view documentation:
 
-  📝 Decrypted Message:
-     "Hello Alice! This is Bob. 👋 I'm sending you this message through PQBridge—our 
-      quantum-resistant secure channel. Your Kyber public key encrypted this, and my 
-      Dilithium signature proves it's really from me. Even quantum computers can't 
-      break this! Welcome to secure communication in the post-quantum world. 🌉🔐✨"
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✨ Success! Secure quantum-resistant bridge established! ✨
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```bash
+cargo doc --open
 ```
 
 ## References
 
 - [NIST Post-Quantum Cryptography Standardization](https://csrc.nist.gov/projects/post-quantum-cryptography)
-- [NIST FIPS 203 - ML-KEM (Kyber)](https://csrc.nist.gov/publications/detail/fips/203/final)
-- [NIST FIPS 204 - ML-DSA (Dilithium)](https://csrc.nist.gov/publications/detail/fips/204/final)
-- [Kyber Specification (CRYSTALS-Kyber)](https://pq-crystals.org/kyber/)
-- [Dilithium Specification (CRYSTALS-Dilithium)](https://pq-crystals.org/dilithium/)
-- [Qiskit - Open-source quantum computing SDK](https://qiskit.org/)
+- [NIST FIPS 203 - ML-KEM](https://csrc.nist.gov/publications/detail/fips/203/final)
+- [NIST FIPS 204 - ML-DSA](https://csrc.nist.gov/publications/detail/fips/204/final)
+- [CRYSTALS-Kyber Specification](https://pq-crystals.org/kyber/)
+- [CRYSTALS-Dilithium Specification](https://pq-crystals.org/dilithium/)
+- [AES-256-GCM Specification](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197.pdf)
 
 ## License
 
@@ -182,4 +158,4 @@ MIT License
 
 ---
 
-**Note**: This is a demonstration project for educational purposes. For production use, consult cryptography experts and follow security best practices.
+**Note:** This is a demonstration project. For production use, consult cryptography experts and follow security best practices.
