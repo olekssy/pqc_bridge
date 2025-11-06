@@ -34,3 +34,6 @@ jobs:
 
     - name: Run tests
       run: cargo test --verbose
+
+    - name: Check packaging
+      run: cargo package --allow-dirty --no-verify

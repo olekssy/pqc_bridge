@@ -1,6 +1,6 @@
 [package]
 name = "pqc_bridge"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Olekssy Lialka <dev.lialka@pm.me>"]
 description = "A lightweight Rust library for post-quantum cryptography providing secure key management, encryption, and digital signatures using NIST-standardized algorithms"
