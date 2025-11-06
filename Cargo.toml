@@ -1,6 +1,6 @@
 [package]
 name = "pqc_bridge"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 authors = ["Olekssy Lialka <dev.lialka@pm.me>"]
 description = "A lightweight Rust library for post-quantum cryptography providing secure key management, encryption, and digital signatures using NIST-standardized algorithms"
@@ -21,3 +21,7 @@ serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.145"
 sha3 = "0.10.8"
 zeroize = { version = "1.8.2", features = ["derive"] }
+
+[[bin]]
+name = "pqc"
+path = "src/main.rs"

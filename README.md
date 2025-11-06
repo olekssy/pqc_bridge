@@ -20,8 +20,21 @@ A lightweight Rust library for post-quantum cryptography providing secure key ma
 
 ### Installation
 
+Install as a dependency in your `Cargo.toml`:
+
+```toml
+[dependencies]
+pqc_bridge = "0.1.1"
+```
+
+Or via Cargo CLI:
 ```bash
 cargo add pqc_bridge
+```
+
+Install the CLI tool:
+```bash
+cargo install pqc_bridge
 ```
 
 ### Library Usage
@@ -47,16 +60,16 @@ assert!(is_signature_valid);
 
 ```bash
 # Generate keypair
-cargo run -- keygen -o alice  # Creates alice.sec and alice.pub
+pqc keygen -o alice  # Creates alice.sec and alice.pub
 
 # Encrypt message
-cargo run -- encrypt -m "Hello!" -k alice.pub -o encrypted.pqc
+pqc encrypt -m "Hello!" -k alice.pub -o encrypted.pqc
 
 # Alternative way to encrypt a file
-cargo run -- encrypt -m @message.txt -k alice.pub -o encrypted.pqc
+pqc encrypt -m @message.txt -k alice.pub -o encrypted.pqc
 
 # Decrypt message
-cargo run -- decrypt -i encrypted.pqc -k alice.sec
+pqc decrypt -i encrypted.pqc -k alice.sec
 ```
 
 ## How It Works
