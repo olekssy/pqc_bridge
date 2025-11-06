@@ -20,19 +20,12 @@ A lightweight Rust library for post-quantum cryptography providing secure key ma
 
 ### Installation
 
-Install as a dependency in your `Cargo.toml`:
-
-```toml
-[dependencies]
-pqc_bridge = "0.1.1"
-```
-
-Or via Cargo CLI:
+Install as a dependency:
 ```bash
 cargo add pqc_bridge
 ```
 
-Install the CLI tool:
+Install as a CLI tool:
 ```bash
 cargo install pqc_bridge
 ```
