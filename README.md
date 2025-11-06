@@ -10,161 +10,69 @@
 A lightweight Rust library for post-quantum cryptography providing secure key management, encryption, and digital signatures using NIST-standardized algorithms.
 
 **Key Features:**
-- 🔐 Simple, clean API for quantum-resistant cryptography
-- ⚡ Hybrid encryption combining post-quantum key encapsulation with symmetric encryption
-- ✍️ Digital signatures with post-quantum algorithms
-- 🎯 Based on NIST FIPS 203 (ML-KEM/Kyber) and FIPS 204 (ML-DSA/Dilithium)
+- 🔐 Simple API for quantum-resistant cryptography
+- ⚡ Hybrid encryption (ML-KEM/Kyber + AES-256-GCM) + digital signatures (ML-DSA/Dilithium)
+- 🔒 Automatic memory zeroization for secret keys
+- 💾 JSON serialization and CLI for file-based operations
+- 🎯 NIST FIPS 203 (ML-KEM-768) and FIPS 204 (ML-DSA-65) compliant
 
-## Installation
+## Quick Start
 
-Add `pqc_bridge` to your `Cargo.toml`:
-
-```toml
-[dependencies]
-pqc_bridge = "0.1.0"
-```
-
-Or use `cargo add`:
+### Installation
 
 ```bash
 cargo add pqc_bridge
 ```
 
-## Usage
-
-Just four simple functions for all your post-quantum cryptography needs:
+### Library Usage
 
 ```rust
 use pqc_bridge::{KeyPair, encrypt, decrypt, sign, verify};
 
-fn main() {
-    let message = "Secret message";
-    
-    // Generate keypair
-    let keypair = KeyPair::generate();
-    
-    // Encrypt with recipient's public key
-    let encrypted = encrypt(message, &keypair.to_public_key());
-    
-    // Decrypt with recipient's secret key
-    let decrypted = decrypt(encrypted, &keypair);
-    assert_eq!(message, decrypted);
-    
-    // Sign with sender's secret key
-    let signature = sign(message, &keypair);
-    
-    // Verify with sender's public key
-    assert!(verify(message, &signature, &keypair.to_public_key()));
-}
+let message = "Secret message";
+let keypair = KeyPair::generate();
+
+// Encryption
+let encrypted = encrypt(message, &keypair.to_public_key());
+let decrypted = decrypt(encrypted, &keypair);
+assert_eq!(message, decrypted);
+
+// Signing
+let signature = sign(message, &keypair);
+let is_signature_valid = verify(message, &signature, &keypair.to_public_key());
+assert!(is_signature_valid);
 ```
 
-## Try the Demo
-
-Clone and run the interactive demo:
+### CLI Usage
 
 ```bash
-git clone https://github.com/olekssy/pqc_bridge.git
-cd pqc_bridge
-cargo run -- demo
+# Generate keypair
+cargo run -- keygen -o alice  # Creates alice.sec and alice.pub
+
+# Encrypt message
+cargo run -- encrypt -m "Hello!" -k alice.pub -o encrypted.pqc
+
+# Alternative way to encrypt a file
+cargo run -- encrypt -m @message.txt -k alice.pub -o encrypted.pqc
+
+# Decrypt message
+cargo run -- decrypt -i encrypted.pqc -k alice.sec
 ```
 
-## Architecture
+## How It Works
 
-### Cryptographic Components
+**Hybrid Encryption:**
+1. Kyber encapsulates a random AES-256 key using recipient's public key
+2. AES-256-GCM encrypts the message with the encapsulated key (fast + quantum-resistant)
 
-- **ML-KEM-768 (Kyber)** - Post-quantum key encapsulation mechanism (NIST FIPS 203)
-- **ML-DSA-65 (Dilithium3)** - Post-quantum digital signature algorithm (NIST FIPS 204)
-- **AES-256-GCM** - Authenticated symmetric encryption
-- **SHA3-256** - Cryptographic hashing for message integrity
+**Digital Signatures:**
+1. SHA3-256 hashes the message, Dilithium signs the hash
+2. Verification checks signature against message hash with sender's public key
 
-### How It Works
-
-**Encryption Flow:**
-1. **Key Encapsulation** - Kyber encapsulates a random AES-256 key using recipient's public key
-2. **Symmetric Encryption** - AES-256-GCM encrypts the message with the encapsulated key
-3. **Packaging** - Returns a `Message` containing Kyber ciphertext, AES ciphertext, and nonce
-
-**Decryption Flow:**
-1. **Key Decapsulation** - Kyber decapsulates the AES-256 key using recipient's secret key
-2. **Symmetric Decryption** - AES-256-GCM decrypts the message
-3. **Verification** - Returns the plaintext message
-
-**Signing & Verification:**
-1. **Signing** - SHA3-256 hashes the message, Dilithium signs the hash
-2. **Verification** - Dilithium verifies the signature against the message hash
-
-**Why Hybrid Encryption?**
-- Kyber provides quantum-resistant key exchange but is computationally expensive
-- AES provides fast bulk encryption but requires secure key distribution
-- Combining them provides both quantum resistance and performance
-
-## API
-
-### KeyPair
-
-A universal container for Dilithium and Kyber keypairs.
-It can be generated anew or constructed from existing public keys shared by the counterparty.
-
-```rust
-// Generate a new keypair
-let keypair = KeyPair::generate(); // contains both secret and public keys
-
-// Extract public key for sharing
-let public_key = keypair.to_public_key(); // no secret keys exposed
-
-// Create keypair from public keys only
-let public_keypair = KeyPair::new_from_public_keys(
-    Some(dilithium_public),
-    Some(kyber_public)
-);
-```
-
-### Encryption & Decryption
-
-```rust
-// Encrypt a message
-let encrypted: Message = encrypt("Hello!", &recipient_public_key);
-
-// Decrypt a message
-let plaintext: String = decrypt(encrypted, &recipient_secret_key);
-```
-
-### Signing & Verification
-
-```rust
-// Sender signs a message
-let signature: String = sign("Important message", &sender_secret_key);
-
-// Recipient verifies sender's signature
-let is_valid: bool = verify("Important message", &signature, &sender_public_key);
-```
-
-## CLI Demo
-
-Run an interactive demonstration:
-
-```bash
-cargo run -- demo
-```
-
-The demo showcases:
-- Keypair generation
-- Message encryption and decryption
-- Message signing and verification
-
-## Testing
-
-```bash
-cargo test
-```
-
-## Documentation
-
-Generate and view documentation:
-
-```bash
-cargo doc --open
-```
+**Security Features:**
+- Automatic zeroization of secret keys in memory
+- JSON serialization with Base64 encoding
+- File-based operations via CLI
 
 ## References
 
@@ -177,8 +85,8 @@ cargo doc --open
 
 ## License
 
-MIT License
+MIT License - See [LICENSE](LICENSE) for details.
 
 ---
 
-**Note:** This is a demonstration project. For production use, consult cryptography experts and follow security best practices.
+**Note:** Educational project. Consult cryptography experts for production use.
