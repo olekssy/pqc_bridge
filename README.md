@@ -10,11 +10,11 @@
 A lightweight Rust library for post-quantum cryptography providing secure key management, encryption, and digital signatures using NIST-standardized algorithms.
 
 **Key Features:**
-- 🔐 Simple API for quantum-resistant cryptography
-- ⚡ Hybrid encryption (ML-KEM/Kyber + AES-256-GCM) + digital signatures (ML-DSA/Dilithium)
-- 🔒 Automatic memory zeroization for secret keys
-- 💾 JSON serialization and CLI for file-based operations
-- 🎯 NIST FIPS 203 (ML-KEM-768) and FIPS 204 (ML-DSA-65) compliant
+- Intuitive API for building secure, quantum-resistant communication systems
+- Unified Rust library and CLI tool in one package for file-based and programmatic operations
+- Hybrid encryption (Kyber x AES-256-GCM) and signatures (Dilithium x SHA3-256)
+- Provides NIST Level 3 192-bit security for encryption and signatures
+- Compliant with NIST FIPS 203 (ML-KEM-768) and FIPS 204 (ML-DSA-65)
 
 ## Quick Start
 
@@ -58,7 +58,7 @@ pqc keygen -o alice  # Creates alice.sec and alice.pub
 # Encrypt message
 pqc encrypt -m "Hello!" -k alice.pub -o encrypted.pqc
 
-# Alternative way to encrypt a file
+# Encrypt file
 pqc encrypt -m @message.txt -k alice.pub -o encrypted.pqc
 
 # Decrypt message
@@ -85,9 +85,8 @@ pqc decrypt -i encrypted.pqc -k alice.sec
 - [NIST Post-Quantum Cryptography Standardization](https://csrc.nist.gov/projects/post-quantum-cryptography)
 - [NIST FIPS 203 - ML-KEM](https://csrc.nist.gov/publications/detail/fips/203/final)
 - [NIST FIPS 204 - ML-DSA](https://csrc.nist.gov/publications/detail/fips/204/final)
-- [CRYSTALS-Kyber Specification](https://pq-crystals.org/kyber/)
-- [CRYSTALS-Dilithium Specification](https://pq-crystals.org/dilithium/)
-- [AES-256-GCM Specification](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197.pdf)
+- [CRYSTALS-Kyber](https://pq-crystals.org/kyber/)
+- [CRYSTALS-Dilithium](https://pq-crystals.org/dilithium/)
 
 ## License
 
@@ -95,4 +94,4 @@ MIT License - See [LICENSE](LICENSE) for details.
 
 ---
 
-**Note:** Educational project. Consult cryptography experts for production use.
+**Note:** Responsibility for secure implementation rests with the user. Consult cryptography experts for production use.
